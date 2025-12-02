@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:tokokita/bloc/produk_bloc.dart';
 import 'package:tokokita/model/produk.dart';
+import 'package:tokokita/ui/produk_page.dart';
+import 'package:tokokita/widget/warning_dialog.dart';
 
 // ignore: must_be_immutable
 class ProdukForm extends StatefulWidget {
   Produk? produk;
+
   ProdukForm({Key? key, this.produk}) : super(key: key);
 
   @override
@@ -32,7 +36,8 @@ class _ProdukFormState extends State<ProdukForm> {
         tombolSubmit = "UBAH";
         _kodeProdukTextboxController.text = widget.produk!.kodeProduk!;
         _namaProdukTextboxController.text = widget.produk!.namaProduk!;
-        _hargaProdukTextboxController.text = widget.produk!.hargaProduk.toString();
+        _hargaProdukTextboxController.text =
+            widget.produk!.hargaProduk.toString();
       });
     } else {
       judul = "Tambah Produk Nabila Banati";
@@ -57,13 +62,13 @@ class _ProdukFormState extends State<ProdukForm> {
           child: Form(
             key: _formKey,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _kodeProdukTextField(),
+                const SizedBox(height: 16),
                 _namaProdukTextField(),
+                const SizedBox(height: 16),
                 _hargaProdukTextField(),
-                const SizedBox(height: 20),
-                _buttonSubmit(),
+                _buttonSubmit()
               ],
             ),
           ),
@@ -119,24 +124,33 @@ class _ProdukFormState extends State<ProdukForm> {
 
   //Membuat Tombol Simpan/Ubah
   Widget _buttonSubmit() {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.teal,
-        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 12),
-      ),
-      child: Text(tombolSubmit, style: const TextStyle(color: Colors.white)),
-      onPressed: () {
-        var validate = _formKey.currentState!.validate();
-        if (validate) {
-          if (!_isLoading) {
-            if (widget.produk != null) {
-              ubah();
-            } else {
-              simpan();
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.teal,
+          padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+        ),
+        child: Text(
+          tombolSubmit,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        onPressed: () {
+          var validate = _formKey.currentState!.validate();
+          if (validate) {
+            if (!_isLoading) {
+              if (widget.produk != null) {
+                ubah();
+              } else {
+                simpan();
+              }
             }
           }
-        }
-      },
+        },
+      ),
     );
   }
 
@@ -144,14 +158,23 @@ class _ProdukFormState extends State<ProdukForm> {
     setState(() {
       _isLoading = true;
     });
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produk berhasil ditambahkan')),
+    Produk createProduk = Produk(id: null);
+    createProduk.kodeProduk = _kodeProdukTextboxController.text;
+    createProduk.namaProduk = _namaProdukTextboxController.text;
+    createProduk.hargaProduk = int.parse(_hargaProdukTextboxController.text);
+    ProdukBloc.addProduk(produk: createProduk).then((value) {
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (BuildContext context) => const ProdukPage()));
+    }, onError: (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => const WarningDialog(
+          description: "Simpan gagal, silahkan coba lagi",
+        ),
       );
-      Navigator.pop(context);
+    });
+    setState(() {
+      _isLoading = false;
     });
   }
 
@@ -159,14 +182,23 @@ class _ProdukFormState extends State<ProdukForm> {
     setState(() {
       _isLoading = true;
     });
-    Future.delayed(const Duration(seconds: 2), () {
-      setState(() {
-        _isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Produk berhasil diubah')),
+    Produk updateProduk = Produk(id: widget.produk!.id!);
+    updateProduk.kodeProduk = _kodeProdukTextboxController.text;
+    updateProduk.namaProduk = _namaProdukTextboxController.text;
+    updateProduk.hargaProduk = int.parse(_hargaProdukTextboxController.text);
+    ProdukBloc.updateProduk(produk: updateProduk).then((value) {
+      Navigator.of(context).push(
+          MaterialPageRoute(builder: (BuildContext context) => const ProdukPage()));
+    }, onError: (error) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => const WarningDialog(
+          description: "Permintaan ubah data gagal, silahkan coba lagi",
+        ),
       );
-      Navigator.pop(context);
+    });
+    setState(() {
+      _isLoading = false;
     });
   }
 }
