@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="tokokita"
+        android:label="responsi2_mobile_paket2_h1d023086"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

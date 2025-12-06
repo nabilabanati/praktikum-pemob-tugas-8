@@ -63,7 +63,7 @@ fontSize: 16.0,
 const SizedBox(height: 24.0),
 Align(
 alignment: Alignment.bottomRight,
-child: ElevatedButton(
+child: OutlinedButton(
 onPressed: () {
 Navigator.of(context).pop(); // To close the dialog
 },
